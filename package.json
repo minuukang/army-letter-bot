@@ -1,0 +1,29 @@
+{
+  "name": "army-letter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node ./src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cheerio": "^0.22.21",
+    "@types/lodash": "^4.14.157",
+    "@types/node-fetch": "^2.5.7",
+    "@types/node-telegram-bot-api": "^0.50.2",
+    "cheerio": "^1.0.0-rc.3",
+    "iconv-lite": "^0.6.2",
+    "lodash": "^4.17.19",
+    "node-fetch": "^2.6.0",
+    "node-telegram-bot-api": "^0.50.0",
+    "playwright": "^1.2.1",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0"
+  }
+}
