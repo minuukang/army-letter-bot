@@ -9,8 +9,13 @@ https://medium.com/@minukang/%EC%9C%A1%EA%B5%B0%ED%9B%88%EB%A0%A8%EC%86%8C-%EC%8
 
 ## 설정
 
-* `$ npm install`
-* `$ cp .env.example .env`
+```bash
+git clone https://github.com/minuukang/army-letter-bot
+cd army-letter-bot
+npm ci
+cp .env.example .env
+npm start
+```
 
 `.env.example` 파일을 `.env` 로 복사하여 알맞는 설정값을 입력하세요.
 
@@ -22,5 +27,3 @@ PASS_AUTH_AGENCY=SKT|KTF|LGT|MVNO # 본인 통신사 (MVNO는 알뜰폰)
 LETTER_PASSWORD=1234 # 편지 작성 비밀번호
 TELEGRAM_TOKEN=my_telegram_token # 텔레그램 토큰
 ```
-
-* `$ npm start`
