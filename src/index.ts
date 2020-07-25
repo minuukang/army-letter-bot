@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import TelegramBot from 'node-telegram-bot-api';
 import writeArmyLetter from './services/writeArmyLetter';
+import { reject } from 'lodash';
 
 dotenv.config();
 
@@ -24,19 +25,24 @@ async function main () {
   });
 
   function telegramAskModel (chatId: number, question: string): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       bot.on('callback_query', function callbackQuery (event) {
+        bot.off('callback_query', callbackQuery);
         if (event.data === 'OK') {
           resolve();
+        } else {
+          reject();
         }
-        bot.off('callback_query', callbackQuery);
       });
       bot.sendMessage(chatId, question, {
         reply_markup : {
           inline_keyboard : [
-            [{ 
+            [{
               text: 'OK',
               callback_data: 'OK'
+            }, {
+              text: 'Cancel',
+              callback_data: 'Cancel'
             }]
           ]
         }
@@ -50,12 +56,17 @@ async function main () {
       try {
         await writeArmyLetter({
           ...config,
-          headless: false,
-          askModel: question => telegramAskModel(message.chat.id, question),
+          askModel: async question => {
+            await Promise.race([
+              telegramAskModel(message.chat.id, question),
+              new Promise((_resolve, reject) => setTimeout(reject, 30 * 1000))
+            ]);
+          },
           logModel: log => {
             bot.sendMessage(message.chat.id, log);
           }
         });
+        bot.sendMessage(message.chat.id, '이용해주셔서 감사합니다.');
       } catch (err) {
         bot.sendMessage(message.chat.id, `Error: ${err.message}`);
       }

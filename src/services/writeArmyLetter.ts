@@ -82,6 +82,5 @@ export default async function writeArmyLetter (letterProps: Props) {
       content: processedNews
     });
   }
-  letterProps.logModel('다 보냈습니다. 이용해주셔서 감사합니다.');
   await browser.close();
 }

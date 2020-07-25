@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "lib": ["ESNext", "DOM"],
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
