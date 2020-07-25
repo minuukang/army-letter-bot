@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 import TelegramBot from 'node-telegram-bot-api';
 import writeArmyLetter from './services/writeArmyLetter';
-import { reject } from 'lodash';
 
 dotenv.config();
 
