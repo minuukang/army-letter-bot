@@ -7,7 +7,7 @@ interface Props {
   name: string;
   password: string;
   passAuthAgency: string;
-  askModel: (question: string) => Promise<void>;
+  askModel: (question: string) => Promise<unknown>;
   headless?: boolean;
 }
 

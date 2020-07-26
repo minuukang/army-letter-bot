@@ -3,6 +3,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import writeArmyLetter from './services/writeArmyLetter';
 import getNews from './api/news';
 import buildArmyLetterContent from './helpers/buildArmyLetterContent';
+import telegramAskModel, { TelegramAskCancelError } from './helpers/telegramAskModel';
 
 dotenv.config();
 
@@ -20,36 +21,9 @@ async function main () {
     throw new Error('Please set your .env file');
   }
 
-
   const bot = new TelegramBot(config.telegramToken, {
     polling: true
   });
-
-  function telegramAskModel (chatId: number, question: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      bot.on('callback_query', function callbackQuery (event) {
-        bot.off('callback_query', callbackQuery);
-        if (event.data === 'OK') {
-          resolve();
-        } else {
-          reject();
-        }
-      });
-      bot.sendMessage(chatId, question, {
-        reply_markup : {
-          inline_keyboard : [
-            [{
-              text: 'OK',
-              callback_data: 'OK'
-            }, {
-              text: 'Cancel',
-              callback_data: 'Cancel'
-            }]
-          ]
-        }
-      });
-    });
-  }
 
   bot.on('message', async message => {
     if (message.text?.includes('뉴스보내줘')) {
@@ -60,12 +34,11 @@ async function main () {
           writeArmyLetter({
             ...config,
             headless: false,
-            askModel: async question => {
-              await Promise.race([
-                telegramAskModel(message.chat.id, question),
-                new Promise((_resolve, reject) => setTimeout(reject, 30 * 1000))
-              ]);
-            }
+            askModel: question => telegramAskModel({
+              bot,
+              chatId: message.chat.id,
+              question
+            })
           })
         ]);
         const date = new Date();
@@ -88,7 +61,11 @@ async function main () {
         }
         await bot.sendMessage(message.chat.id, '이용해주셔서 감사합니다.');
       } catch (err) {
-        await bot.sendMessage(message.chat.id, `Error: ${err.message}`);
+        if (err instanceof TelegramAskCancelError) {
+          await bot.sendMessage(message.chat.id, '취소되었습니다. 다음에 이용해주시길 바랍니다.');
+        } else {
+          await bot.sendMessage(message.chat.id, `Error: ${err.message}`);
+        }
       }
     }
   });
