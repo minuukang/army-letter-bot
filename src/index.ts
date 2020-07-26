@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
 import TelegramBot from 'node-telegram-bot-api';
 import writeArmyLetter from './services/writeArmyLetter';
-import { reject } from 'lodash';
+import getNews from './api/news';
+import buildArmyLetterContent from './helpers/buildArmyLetterContent';
 
 dotenv.config();
 
@@ -52,23 +53,42 @@ async function main () {
 
   bot.on('message', async message => {
     if (message.text?.includes('뉴스보내줘')) {
-      bot.sendMessage(message.chat.id, '알겠습니다.');
+      await bot.sendMessage(message.chat.id, '알겠습니다.');
       try {
-        await writeArmyLetter({
-          ...config,
-          askModel: async question => {
-            await Promise.race([
-              telegramAskModel(message.chat.id, question),
-              new Promise((_resolve, reject) => setTimeout(reject, 30 * 1000))
-            ]);
-          },
-          logModel: log => {
-            bot.sendMessage(message.chat.id, log);
+        const [news, { browser, writeMessage }] = await Promise.all([
+          getNews(),
+          writeArmyLetter({
+            ...config,
+            headless: false,
+            askModel: async question => {
+              await Promise.race([
+                telegramAskModel(message.chat.id, question),
+                new Promise((_resolve, reject) => setTimeout(reject, 30 * 1000))
+              ]);
+            }
+          })
+        ]);
+        const date = new Date();
+        const ymdhis = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours()}시 ${date.getMinutes()}분 실시간 뉴스`;
+        const buildNews = buildArmyLetterContent(news);
+        const progressMessage = await bot.sendMessage(message.chat.id, `${buildNews.length}개의 편지 중 0개 보내기 완료 (0%)`);
+        try {
+          for (const [index, processedNews] of Object.entries(buildNews)) {
+            await writeMessage({
+              title: `${ymdhis} #${index}`,
+              content: processedNews
+            });
+            await bot.editMessageText(`${buildNews.length}개의 편지 중 ${index + 1}개 보내기 완료 (${Number(index) / buildNews.length * 100}%)`, {
+              chat_id: message.chat.id,
+              message_id: progressMessage.message_id
+            });
           }
-        });
-        bot.sendMessage(message.chat.id, '이용해주셔서 감사합니다.');
+        } finally {
+          await browser.close();
+        }
+        await bot.sendMessage(message.chat.id, '이용해주셔서 감사합니다.');
       } catch (err) {
-        bot.sendMessage(message.chat.id, `Error: ${err.message}`);
+        await bot.sendMessage(message.chat.id, `Error: ${err.message}`);
       }
     }
   });
