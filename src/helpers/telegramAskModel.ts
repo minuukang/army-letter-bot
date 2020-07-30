@@ -8,7 +8,7 @@ interface TelegramAskModelOptions {
 
 export class TelegramAskCancelError extends Error {}
 
-const MAX_WAITING_TIME = 30 * 1000;
+const MAX_WAITING_TIME = 120 * 1000;
 
 export default function telegramAskModel ({ bot, chatId, question }: TelegramAskModelOptions): Promise<unknown> {
   return Promise.race([

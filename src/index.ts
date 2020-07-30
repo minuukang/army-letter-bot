@@ -33,7 +33,7 @@ async function main () {
           getNews(),
           writeArmyLetter({
             ...config,
-            headless: false,
+            headless: true,
             askModel: question => telegramAskModel({
               bot,
               chatId: message.chat.id,
