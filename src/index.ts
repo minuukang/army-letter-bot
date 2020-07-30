@@ -51,7 +51,8 @@ async function main () {
               title: `${ymdhis} #${index}`,
               content: processedNews
             });
-            await bot.editMessageText(`${buildNews.length}개의 편지 중 ${index + 1}개 보내기 완료 (${Number(index) / buildNews.length * 100}%)`, {
+            const indexNumber = Number(index);
+            await bot.editMessageText(`${buildNews.length}개의 편지 중 ${indexNumber + 1}개 보내기 완료 (${indexNumber / buildNews.length * 100}%)`, {
               chat_id: message.chat.id,
               message_id: progressMessage.message_id
             });
@@ -59,7 +60,10 @@ async function main () {
         } finally {
           await browser.close();
         }
-        await bot.sendMessage(message.chat.id, '이용해주셔서 감사합니다.');
+        await bot.editMessageText(`${buildNews.length}개의 편지 중 ${buildNews.length}개 보내기 완료 (100%)\n이용해주셔서 감사합니다.`, {
+          chat_id: message.chat.id,
+          message_id: progressMessage.message_id
+        });
       } catch (err) {
         if (err instanceof TelegramAskCancelError) {
           await bot.sendMessage(message.chat.id, '취소되었습니다. 다음에 이용해주시길 바랍니다.');

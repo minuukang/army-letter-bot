@@ -13,7 +13,7 @@ interface Props {
 
 const pageUrl = 'http://www.katc.mil.kr/katc/community/children.jsp';
 
-export default async function writeArmyLetter ({ inDate, birthDate, name, password, passAuthAgency, askModel, logModel, headless }: Props) {
+export default async function writeArmyLetter ({ inDate, birthDate, name, password, passAuthAgency, askModel, headless }: Props) {
   const url = new URL(pageUrl);
   url.searchParams.set('search_val1', Buffer.from(inDate).toString('base64'));
   url.searchParams.set('search_val2', Buffer.from(birthDate).toString('base64'));
